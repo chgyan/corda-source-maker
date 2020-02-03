@@ -24,7 +24,7 @@ import java.io.File;
 import java.util.*;
 
 @RestController
-@RequestMapping("freemarker")
+@RequestMapping("/freemarker")
 public class FreeMarkerController {
 
     Logger logger = LoggerFactory.getLogger(FreeMarkerController.class);
@@ -35,7 +35,7 @@ public class FreeMarkerController {
     @Autowired
     BuildService buildService;
 
-    @RequestMapping("gen")
+    @RequestMapping("/gen")
     public String gen(String tableName, String packageName, String command, String tableInfo, boolean complier, String jarName){
         String result = "";
         if(genSourceCode(tableName, packageName, command, tableInfo)){
