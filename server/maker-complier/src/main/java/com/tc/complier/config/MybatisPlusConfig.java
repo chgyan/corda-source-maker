@@ -1,9 +1,11 @@
 package com.tc.complier.config;
 
+import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.MybatisConfiguration;
 import com.baomidou.mybatisplus.core.MybatisXMLLanguageDriver;
 import com.baomidou.mybatisplus.core.toolkit.ObjectUtils;
-import com.baomidou.mybatisplus.extension.plugins.PaginationInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.spring.MybatisSqlSessionFactoryBean;
 import org.apache.ibatis.mapping.DatabaseIdProvider;
 import org.apache.ibatis.plugin.Interceptor;
@@ -18,6 +20,7 @@ import org.springframework.core.io.ResourceLoader;
 import org.springframework.util.StringUtils;
 
 import javax.sql.DataSource;
+import java.util.Collections;
 
 @Configuration
 @MapperScan("com.tc.complier.dao*")
@@ -37,15 +40,25 @@ public class MybatisPlusConfig {
 
     @Autowired(required = false)
     private DatabaseIdProvider databaseIdProvider;
-
     /**
-     *   mybatis-plus分页插件
+     * 分页插件 3.5.X
+     * @author zhengkai.blog.csdn.net
      */
     @Bean
-    public PaginationInterceptor paginationInterceptor() {
-        PaginationInterceptor page = new PaginationInterceptor();
-        page.setDialectType("mysql");
-        return page;
+    public PaginationInnerInterceptor paginationInnerInterceptor() {
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor();
+        // 设置最大单页限制数量，默认 500 条，-1 不受限制
+        paginationInterceptor.setMaxLimit(-1L);
+        paginationInterceptor.setDbType(DbType.MYSQL);
+        // 开启 count 的 join 优化,只针对部分 left join
+        paginationInterceptor.setOptimizeJoin(true);
+        return paginationInterceptor;
+    }
+    @Bean
+    public MybatisPlusInterceptor mybatisPlusInterceptor(){
+        MybatisPlusInterceptor mybatisPlusInterceptor = new MybatisPlusInterceptor();
+        mybatisPlusInterceptor.setInterceptors(Collections.singletonList(paginationInnerInterceptor()));
+        return mybatisPlusInterceptor;
     }
     /**
      * 这里全部使用mybatis-autoconfigure 已经自动加载的资源。不手动指定
